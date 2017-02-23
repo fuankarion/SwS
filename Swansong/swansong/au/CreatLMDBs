@@ -1,0 +1,26 @@
+GLOG_logtostderr=1 /home/jcleon/Software/caffe/build/tools/convert_imageset \
+    --resize_height=256 --resize_width=256 --encoded \
+    / \
+    /home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/trainFlow.txt \
+    /home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/lmdbs/trainAU3V3FLOW
+
+GLOG_logtostderr=1 /home/jcleon/Software/caffe/build/tools/convert_imageset \
+    --resize_height=256 --resize_width=256 --encoded \
+    / \
+    /home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/valFlow.txt \
+    /home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/lmdbs/valU3V3FLOW
+
+=======
+
+GLOG_logtostderr=1 /home/jcleon/Software/caffe/build/tools/convert_imageset \
+    --resize_height=256 --resize_width=256 --encoded \
+    / \
+    /home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/train.txt \
+    /home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/lmdbs/trainU3V3RGB
+
+GLOG_logtostderr=1 /home/jcleon/Software/caffe/build/tools/convert_imageset \
+    --resize_height=256 --resize_width=256 --encoded \
+    / \
+    /home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/val.txt \
+    /home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/lmdbs/valU3V3RGB
+
