@@ -14,16 +14,16 @@ caffe.set_device(0)
 caffe.set_mode_gpu()
 
 #Actual Params
-solverPath = '/home/jcleon/Swansong/models/au/AU3V3VGG16/solver.prototxt'
+solverPath = '/home/jcleon/Swansong/models/au/AU1V1VGG16/solver.prototxt'
 #Log Data
-targetLogFile ='/home/jcleon/Swansong/models/au/AU3V3VGG16/logs/log.txt'
+targetLogFile ='/home/jcleon/Swansong/models/au/AU1V1VGG16/logs/log.txt'
 
 
 #Solver data 
 solver = caffe.get_solver(solverPath)
 #Load andres Init
 netObjects = caffe.Net('/home/jcleon/models/deployVGG16Binary.prototxt', 
-                       '/home/jcleon/Storage/disk2/snapshot/v3/AU07/_iter_8596.caffemodel', caffe.TEST)
+                       '/home/jcleon/Storage/disk2/snapshot/v1/AU01/_iter_12348.caffemodel', caffe.TEST)
 
 #copy andres weight into conv maps
 solver.net.params['conv1_1'][0].data[...] = netObjects.params['conv1_1'][0].data 
@@ -73,11 +73,11 @@ solver.net.params['fc7'][0].data[...].flat = netObjects.params['fc7'][0].data.fl
 solver.net.params['fc7'][1].data[...].flat = netObjects.params['fc7'][1].data.flat
 
 #Training Config (same as in solver)
-batchesForTraining = 968
-batchesUntillStep = 16;
-maxSteps = 1;#Not quite there is a step
+batchesForTraining = 1263
+batchesUntillStep = 10;
+maxSteps = 2;#Not quite there is a step
 niter = batchesForTraining * batchesUntillStep * maxSteps
-test_iters = 2347
+test_iters = 1432
 
 trainNetworkBetterTrainDataLogTop2(solver, niter, batchesForTraining, targetLogFile, test_iters, 5, 30)
 

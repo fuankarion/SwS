@@ -94,20 +94,20 @@ def createFullSetForLabel(auTarget, viewsDirectory, actualView):
     return finalTrainSet, finalValSet
 
 #EXEC
-finalTrainSet, finalValSet = createFullSetForLabel(3, '/home/jcleon/Storage/ssd0/fullFaceTrainFiles', 'v3')
-writeSetToFile(finalTrainSet, '/home/jcleon/Storage/ssd1/au3V3BalancedSets/train.txt')
-writeSetToFile(finalValSet, '/home/jcleon/Storage/ssd1/au3V3BalancedSets/val.txt')
+finalTrainSet, finalValSet = createFullSetForLabel(1, '/home/jcleon/Storage/ssd0/fullFaceTrainFiles', 'v5')
+writeSetToFile(finalTrainSet, '/home/jcleon/Storage/ssd1/au1V5BalancedSets/train.txt')
+writeSetToFile(finalValSet, '/home/jcleon/Storage/ssd1/au1V5BalancedSets/val.txt')
 
-flowSetTrain = generateFlowSetFromRGBSet('/home/jcleon/Storage/ssd1/au3V3BalancedSets/train.txt', 7, '/home/jcleon/Storage/ssd1/Flow/Train')
-flowSetVal = generateFlowSetFromRGBSet('/home/jcleon/Storage/ssd1/au3V3BalancedSets/val.txt', 7, '/home/jcleon/Storage/ssd1/Flow/Val')
+flowSetTrain = generateFlowSetFromRGBSet('/home/jcleon/Storage/ssd1/au1V5BalancedSets/train.txt', 6, '/home/jcleon/Storage/ssd1/Flow/Train')
+flowSetVal = generateFlowSetFromRGBSet('/home/jcleon/Storage/ssd1/au1V5BalancedSets/val.txt', 7, '/home/jcleon/Storage/ssd1/Flow/Val')
 
-writeSetToFile(flowSetTrain, '/home/jcleon/Storage/ssd1/au3V3BalancedSets/trainFlow.txt')
-writeSetToFile(flowSetVal, '/home/jcleon/Storage/ssd1/au3V3BalancedSets/valFlow.txt')
+writeSetToFile(flowSetTrain, '/home/jcleon/Storage/ssd1/au1V5BalancedSets/trainFlow.txt')
+writeSetToFile(flowSetVal, '/home/jcleon/Storage/ssd1/au1V5BalancedSets/valFlow.txt')
 
-shuffledTrain, shuffledTrainFlow = shuffleFilesAlike('/home/jcleon/Storage/ssd1/au3V3BalancedSets/train.txt', '/home/jcleon/Storage/ssd1/au3V3BalancedSets/trainFlow.txt')
-shuffledVal, shuffledValFlow = shuffleFilesAlike('/home/jcleon/Storage/ssd1/au3V3BalancedSets/val.txt', '/home/jcleon/Storage/ssd1/au3V3BalancedSets/valFlow.txt')
+shuffledTrain, shuffledTrainFlow = shuffleFilesAlike('/home/jcleon/Storage/ssd1/au1V5BalancedSets/train.txt', '/home/jcleon/Storage/ssd1/au1V5BalancedSets/trainFlow.txt')
+shuffledVal, shuffledValFlow = shuffleFilesAlike('/home/jcleon/Storage/ssd1/au1V5BalancedSets/val.txt', '/home/jcleon/Storage/ssd1/au1V5BalancedSets/valFlow.txt')
 
-writeLinesToFile(shuffledTrainFlow, '/home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/trainFlow.txt')
-writeLinesToFile(shuffledValFlow, '/home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/valFlow.txt')
-writeLinesToFile(shuffledTrain, '/home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/train.txt')
-writeLinesToFile(shuffledVal, '/home/jcleon/Storage/ssd1/au3V3BalancedSets/shuffled/val.txt')
+writeLinesToFile(shuffledTrainFlow, '/home/jcleon/Storage/ssd1/au1V5BalancedSets/shuffled/trainFlow.txt')
+writeLinesToFile(shuffledValFlow, '/home/jcleon/Storage/ssd1/au1V5BalancedSets/shuffled/valFlow.txt')
+writeLinesToFile(shuffledTrain, '/home/jcleon/Storage/ssd1/au1V5BalancedSets/shuffled/train.txt')
+writeLinesToFile(shuffledVal, '/home/jcleon/Storage/ssd1/au1V5BalancedSets/shuffled/val.txt')

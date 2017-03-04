@@ -10,20 +10,20 @@ import caffe #Caffe Lib
 
 from coreFunctions import trainNetworkBetterTrainDataLogTop2
   
-caffe.set_device(0)
+caffe.set_device(1)
 caffe.set_mode_gpu()
 
 #Actual Params
-solverPath = '/home/jcleon/Swansong/models/au/AU3V3VGG16/solver.prototxt'
+solverPath = '/home/jcleon/Swansong/models/au/AU1V5VGG16/solver.prototxt'
 #Log Data
-targetLogFile ='/home/jcleon/Swansong/models/au/AU3V3VGG16/logs/log.txt'
+targetLogFile ='/home/jcleon/Swansong/models/au/AU1V5VGG16/logs/log.txt'
 
 
 #Solver data 
 solver = caffe.get_solver(solverPath)
 #Load andres Init
 netObjects = caffe.Net('/home/jcleon/models/deployVGG16Binary.prototxt', 
-                       '/home/jcleon/Storage/disk2/snapshot/v3/AU07/_iter_8596.caffemodel', caffe.TEST)
+                       '/home/jcleon/Storage/disk2/snapshot/v5/AU01/_iter_12348.caffemodel', caffe.TEST)
 
 #copy andres weight into conv maps
 solver.net.params['conv1_1'][0].data[...] = netObjects.params['conv1_1'][0].data 
