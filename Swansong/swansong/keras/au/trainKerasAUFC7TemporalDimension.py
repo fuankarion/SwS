@@ -2,13 +2,13 @@ from keras.layers import Activation
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import LSTM
-from keras.layers.convolutional import Convolution1D
 from keras.layers.convolutional import MaxPooling1D
 from keras.layers.wrappers import TimeDistributed
 from keras.models import Sequential
 from keras.optimizers import SGD
 import numpy as np
 import os
+import random
 import re
 
 auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
@@ -20,24 +20,23 @@ def natural_key(string_):
 
 def writeBulkLoadFeats(bulkLoadDir, aSubject, aTask, view, K, data, extra):
     bulkLoadFile = bulkLoadDir + '/' + aSubject + '-' + aTask + '-' + view + '-' + extra  + str(K)
-    
-    print('data.shape', data.shape)
-    
-    #with open(bulkLoadFile, 'wb') as blFile:
-    #    np.savetxt(blFile, data, delimiter=",")
     np.save(bulkLoadFile, data)
-   
         
-        
-def loadFeats(rootPath, aSubject, aTask, view, K, bulkLoadDir, extra):
-    bulkLoadFile = bulkLoadDir + '/' + aSubject + '-' + aTask + '-' + view + '-' + extra  + str(K) + '.npy'
+def testBulkLoadData(bulkLoadFile):
     if os.path.exists(bulkLoadFile):
         fromDisk = np.load(bulkLoadFile)
         print('fromBulkFileFeats.shape ', fromDisk.shape)
         return fromDisk, True
     
-    print('No BulkFile Found at ', bulkLoadFile, ' read al txt')
-    
+    else:
+        print('No Feat BulkFile Found at ', bulkLoadFile, ' read al txt')
+        return None, False
+   
+def loadFeats(rootPath, aSubject, aTask, view, K, bulkLoadDir, extra):
+    bulkLoadFile = bulkLoadDir + '/' + aSubject + '-' + aTask + '-' + view + '-' + extra  + str(K) + '.npy'
+    data, flag = testBulkLoadData(bulkLoadFile)
+    if flag:
+        return data, flag
     
     txtFilesPath = rootPath + '/' + aSubject + '/' + aTask + '/' + view + '/'
     print('txtFilesPath ', txtFilesPath)
@@ -46,28 +45,26 @@ def loadFeats(rootPath, aSubject, aTask, view, K, bulkLoadDir, extra):
     allFilesInDir = sorted(allFilesInDir, key=natural_key)
     allFilesInDir = allFilesInDir[:-1]#pesky label file
     
-    feats = np.zeros([0, 4096])#TODO ardcoded 4096
+    allfeats = np.zeros([len(allFilesInDir), 4096])#TODO hardcoded 4096
     
     idx = 0
     for aFile in allFilesInDir:
         tempPath = os.path.join(txtFilesPath, aFile)
-        tempArray = np.loadtxt(tempPath)
+        tempFeats = np.loadtxt(tempPath)
         
-        feats = np.insert(feats, idx, tempArray, axis=0)
+        allfeats[idx, :] = tempFeats
         idx = idx + 1
         if idx % 100 == 0:
             print(idx, '/', len(allFilesInDir))
         
-    return feats, False
+    return allfeats, False
 
 def loadLabels(rootPath, aSubject, aTask, view, K, bulkLoadDir, extra):
     bulkLoadFile = bulkLoadDir + '/' + aSubject + '-' + aTask + '-' + view + '-' + extra  + str(K) + '.npy'
-    if os.path.exists(bulkLoadFile):
-        fromDisk = np.load(bulkLoadFile)
-        print('fromBulkFileLabels.shape ', fromDisk.shape)
-        return fromDisk, True
-   
-    print('No BulkFile Found at ', bulkLoadFile, ' read al txt')
+    data, flag = testBulkLoadData(bulkLoadFile)
+    if flag:
+        return data, flag
+    
     
     txtFilesPath = rootPath + '/' + aSubject + '/' + aTask + '/' + view + '/'
     print('txtFilesPath ', txtFilesPath)
@@ -87,21 +84,25 @@ def loadLabels(rootPath, aSubject, aTask, view, K, bulkLoadDir, extra):
     return np.array(labels), False
             
             
-#map to Nsamples,K,4096
+#map to ?,K,4096
 def reshapeTrainData(feats, labels, K):
+    print('Reshape')
     x = range(0, feats.shape[0])
-    #print(x)
-    reshaped = np.zeros([0, feats.shape[1] * K])
+
+    reshaped = np.zeros([len(x)-(K-1), K, feats.shape[1]])
     labelsReshaped = np.zeros(0, dtype=int)
+    
     for startIdx in range(0, len(x)-(K-1)):
-        targetIndexes = x[startIdx:startIdx + K]      
+        targetIndexes = x[startIdx:startIdx + K]  
         midOne = targetIndexes[len(targetIndexes) / 2]
         
-        segment = feats[targetIndexes,:]
-        labelSegment = labels[midOne]
+        #Feats
+        segment = feats[targetIndexes, :]
+        reshaped[startIdx, :, :] = segment
         
+        #Labels
+        labelSegment = labels[midOne]
         labelsReshaped = np.insert(labelsReshaped, startIdx, int(labelSegment), axis=0)
-        reshaped = np.insert(reshaped, startIdx, segment.flatten(), axis=0)
 
     return reshaped, labelsReshaped
 
@@ -117,12 +118,13 @@ def loadSet(subjects, tasks, txtDir):
             try:
                 labels, bulkLoadLabels = loadLabels(txtDir, aSubject, aTask, view, K, bulkLoadDir, 'LabelsK')    
                 feats, bulkLoadFeats = loadFeats(txtDir, aSubject, aTask, view, K, bulkLoadDir, 'FeatsK')
-            except:
+            except Exception  as err:
+                print(err)
                 print('Skip load ', aSubject, ' ', aTask)
                 continue
+            
             if not bulkLoadFeats:
                 featsReshaped, labelsReshaped = reshapeTrainData(feats, labels, K)
-                featsReshaped = np.reshape(featsReshaped, (featsReshaped.shape[0], 1, featsReshaped.shape[1]))#extra reshaoe for keras LSTM
 
                 #Save to bulk load
                 writeBulkLoadFeats(bulkLoadDir, aSubject, aTask, view, K, featsReshaped, 'FeatsK')
@@ -131,6 +133,7 @@ def loadSet(subjects, tasks, txtDir):
                 featsReshaped = feats
                 labelsReshaped = labels
 
+            #Append to current Feats
             if trainFeats == None:
                 trainFeats = np.copy(featsReshaped)
             else:
@@ -140,13 +143,13 @@ def loadSet(subjects, tasks, txtDir):
                 trainLabels = np.copy(labelsReshaped)
             else:
                 trainLabels = np.concatenate((trainLabels, labelsReshaped), axis=0)
-            """    
+                
             print('featsReshaped.shape', featsReshaped.shape)
             print('labelsReshaped.shape', labelsReshaped.shape)
 
             print('trainLabels.shape', trainLabels.shape)
             print('trainFeats.shape', trainFeats.shape)
-
+    """        
     print('Final trainFeats.shape ', trainFeats.shape)
     print('Final trainLabels.shape ', trainLabels.hape)
     """
@@ -157,15 +160,13 @@ au = 'AU01'
 view = 'v1'
 
 txtFeatsDir = '/home/jcleon/Storage/ssd0/fc7Feats/AU01_v1_Fold0'
-bulkLoadDir = '/home/jcleon/Storage/ssd0/bulkLoadFera'
+bulkLoadDir = '/home/jcleon/Storage/ssd0/bulkLoadFeraTemporalDimension'
 
-trainSubjects = ['F007', 'F008', 'F009', 'F011', 'M001', 'M003', 'M004', 'M005', 'M006', 'rM001', 'rM002', 'rM003', 'rM004']
-#trainSubjects = ['F011', 'F009','F011','F009']
-#testSubjects = ['F011', 'F009']
-testSubjects = ['M002', 'F010', 'rM007']
+trainSubjects = ['F007', 'F009', 'F010', 'M001', 'M003', 'M004', 'rM001', 'rM003', 'rM004']
+testSubjects = ['F008', 'M002', 'rM002']
 
 tasksTrain = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14']
-tasksTest = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14']
+tasksTest = ['T1', 'T11', 'T12',]
 
 trainFeats, trainLabels = loadSet(trainSubjects, tasksTrain, txtFeatsDir)
 testFeats, testLabels = loadSet(testSubjects, tasksTest, txtFeatsDir)
@@ -176,6 +177,7 @@ print(trainLabels.shape)
 print(testFeats.shape)
 print(testLabels.shape)
 
+
 print('Counts')
 labelDist = np.bincount(trainLabels)
 negProportion = float(labelDist[0]) / float(labelDist[0] + labelDist[1])
@@ -183,33 +185,56 @@ posProportion = float(labelDist[1]) / float(labelDist[0] + labelDist[1])
 print(np.bincount(trainLabels))
 print(np.bincount(testLabels))
 
+deleteIdx = []
+for rowDeleteIdx in range(0, trainLabels.shape[0]):
+    if trainLabels[rowDeleteIdx] == 0:
+        randomFlag = random.uniform(0, 1)
+        if randomFlag <= negProportion * 0.90:
+            deleteIdx.append(rowDeleteIdx)
+            
+            
+trainFeats = np.delete(trainFeats, deleteIdx, 0)
+trainLabels = np.delete(trainLabels, deleteIdx, 0)
 
+print('Counts Balanced')
+labelDist = np.bincount(trainLabels)
+negProportion = float(labelDist[0]) / float(labelDist[0] + labelDist[1])
+posProportion = float(labelDist[1]) / float(labelDist[0] + labelDist[1])
+print(np.bincount(trainLabels))
+print(np.bincount(testLabels))
+
+#Model Definition
 model = Sequential()
-model.add(Convolution1D(nb_filter=1, filter_length=1, border_mode='same', input_dim=K * 4096))#TODO care about hardcoded 4096
-model.add(Activation('sigmoid'))
+model.add(Dense(256, activation='relu', input_shape=(K, 4096)))
+model.add(Dropout(0.5))
 
-model.add(Dense(1024, activation='relu'))
-model.add(Dropout(0.5))
-#model.add(MaxPooling1D(pool_length=2))
+model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.35))
+
 model.add(Dense(32, activation='relu'))
-model.add(Dropout(0.5))
+model.add(Dropout(0.25))
 
 model.add(LSTM(1))
 model.add(Dropout(0.2))
 model.add(Dense(1, activation='sigmoid'))
 
-sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+#Solver
+sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy', 'fmeasure'])
 print(model.summary())
 
 classWeights = {0: 1-negProportion, 1: 1-posProportion}
 print('classWeights', classWeights)
-model.fit(trainFeats, trainLabels, nb_epoch=60, batch_size=300, verbose=1, class_weight=classWeights, validation_split=0.5)
+model.fit(trainFeats, trainLabels, nb_epoch=60, batch_size=300, verbose=1, class_weight=classWeights)
+#model.fit(trainFeats, trainLabels, nb_epoch=6, batch_size=300, verbose=1, class_weight=classWeights, validation_split=0.5)
 
 
 print('XXXX Fitting done forward')
 # Final evaluation of the model
-scores = model.evaluate(trainFeats, trainLabels, verbose=1)
+preds = model.predict_classes(testFeats)
+print(' ')
+print(classification_report(testLabels, preds))
+scores = model.evaluate(testFeats, testLabels, verbose=1)
 print(scores)
 print(len(scores))
 
