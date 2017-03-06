@@ -1,10 +1,7 @@
 import glob
-import lmdb
 import numpy as np
 import os
 from sklearn.metrics import classification_report
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
 import sys
 
 sys.path.insert(0, '/home/jcleon/Software/caffe/' + 'python')
@@ -17,12 +14,13 @@ caffe.set_device(1)
 caffe.set_mode_gpu()
 
 
-def loadNetModel(auName, view):
-    tagetModels = '/home/jcleon/ModeslAFConcat2/snapshot_concat2/' + view + '/' + auName + '/*.caffemodel'
+def loadNetModel(auName, view, modelsRootPath):
+    #TODO this is a param
+    tagetModels = modelsRootPath + view + '/' + auName + '/*.caffemodel'
     print('tagetModels ', tagetModels)
     modelCand = glob.glob(tagetModels)
     print('Load model ', modelCand[0])
-    net = caffe.Net('/home/jcleon/ModeslAFConcat2/deploy_Test.prototxt',
+    net = caffe.Net('/home/jcleon/Storage/disk2/ModeslAFConcat2/deploy_Test.prototxt',
                     modelCand[0], caffe.TEST)
     return net
 
@@ -54,7 +52,7 @@ def netForward(net, transformerFLOW, transformerRGB, imgRGB, imgFLow):
         im = caffe.io.load_image(imgRGB)
         imf = caffe.io.load_image(imgFLow)
     except:
-        return net,False
+        return net, False
     
     #Set flow and RGB data
     net.blobs['dataRGB'].reshape(1, 3, 224, 224)
@@ -63,7 +61,7 @@ def netForward(net, transformerFLOW, transformerRGB, imgRGB, imgFLow):
     net.blobs['dataFLOW'].reshape(1, 3, 224, 224)
     net.blobs['dataFLOW'].data[...] = transformerFLOW.preprocess('dataFLOW', imf)
     net.forward()
-    return net,True
+    return net, True
 
 
 def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward):
@@ -81,7 +79,7 @@ def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForwar
 
             pathFLow = '/home/jcleon/Storage/ssd0/Flow/Val/' + pathTokens[7] + '/' + pathTokens[8] + '/' + pathTokens[9] + '/' + pathTokens[10]
 
-            net,flag = netForward(net, transformerFLOW, transformerRGB, lineTokens[0], pathFLow)
+            net, flag = netForward(net, transformerFLOW, transformerRGB, lineTokens[0], pathFLow)
 
             #print (out['loss'])
             if flag == False:
@@ -107,9 +105,9 @@ def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForwar
             preds.append(net.blobs['softmax'].data[0].argmax())
             scores.append(net.blobs['softmax'].data[0][1])
 
-            fc7Feats = net.blobs['fc7'].data[0].flatten()#just in case
+            softMaxFeat = net.blobs['softmax'].data[0].flatten()#just in case
             with open(finalTargetForward, 'wb') as myFile:
-                np.savetxt(myFile, fc7Feats, delimiter=",")
+                np.savetxt(myFile, softMaxFeat, delimiter=",")
 
             if idx % 200 == 0:
                 print('Forwards ', idx)
@@ -118,24 +116,3 @@ def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForwar
             idx = idx + 1
          
     return gts, preds, scores
-
-#exec
-auName = 'AU01'
-view = 'v1'
-fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Test.txt'
-
-targetForward = '/home/jcleon/Storage/ssd0/fc7Feats/' + '/' + auName + '_' + view + '_Model'
-
-net = loadNetModel(auName, view)
-transformerFLOW, transformerRGB = createTransformers(net)
-
-gts, preds, scores = forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward)
-
-eng = matlab.engine.start_matlab()
-cs = classification_report(gts, preds)
-ps = eng.CalcRankPerformance(matlab.int8(gts), matlab.double(scores), 1, 'All')
-F1_MAX = max(np.array(ps['F1']))[0]
-
-with open(targetForward + '/overalReport.txt', 'a') as reportFile:
-    reportFile.write(str(cs) + ' \n ' + ' F1Max: ' + str(F1_MAX))
-
