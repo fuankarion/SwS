@@ -3,12 +3,12 @@ from forwardCore import *
 #exec
 auName = 'AU01'
 view = 'v1'
-fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Training.txt'
+fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Test.txt'
 modelsRootPath = '/home/jcleon/fold/fold_0/'
 
 
-basePathFlow='/home/jcleon/Storage/ssd0/Flow/Train'
-targetForward = '/home/jcleon/Storage/ssd0/FeatsTrain/fc7Feats/' + '/' + auName + '_' + view + '_Fold0'
+basePathFlow='/home/jcleon/Storage/ssd0/Flow/Val'
+targetForward = '/home/jcleon/Storage/ssd0/FeatsVal/fc7Feats/' + '/' + auName + '_' + view + '_Fold0'
 
 net = loadNetModel(auName, view, modelsRootPath)
 transformerFLOW, transformerRGB = createTransformers(net)
