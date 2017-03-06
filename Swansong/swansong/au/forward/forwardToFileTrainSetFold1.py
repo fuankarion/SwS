@@ -3,15 +3,17 @@ from forwardCore import *
 #exec
 auName = 'AU01'
 view = 'v1'
-fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Test.txt'
-modelsRootPath = '/home/jcleon/fold/fold_0/'
+fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Training.txt'
+modelsRootPath = '/home/jcleon/fold/fold_1/'
 
-targetForward = '/home/jcleon/Storage/ssd0/fc7Feats/' + '/' + auName + '_' + view + '_Fold0'
+
+basePathFlow='/home/jcleon/Storage/ssd0/Flow/Train'
+targetForward = '/home/jcleon/Storage/ssd0/FeatsTrain/fc7Feats/' + '/' + auName + '_' + view + '_Fold1'
 
 net = loadNetModel(auName, view, modelsRootPath)
 transformerFLOW, transformerRGB = createTransformers(net)
 
-gts, preds, scores = forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward)
+gts, preds, scores = forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward,basePathFlow)
 
 eng = matlab.engine.start_matlab()
 cs = classification_report(gts, preds)

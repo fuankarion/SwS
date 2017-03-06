@@ -64,7 +64,7 @@ def netForward(net, transformerFLOW, transformerRGB, imgRGB, imgFLow):
     return net, True
 
 
-def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward):
+def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFLow):
     gts = []
     preds = []
     scores = []
@@ -77,8 +77,10 @@ def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForwar
             lineTokens = aLine.split(' ')
             pathTokens = lineTokens[0].split('/')
 
-            pathFLow = '/home/jcleon/Storage/ssd0/Flow/Val/' + pathTokens[7] + '/' + pathTokens[8] + '/' + pathTokens[9] + '/' + pathTokens[10]
+            pathFLow = basePathFLow + '/' + pathTokens[7] + '/' + pathTokens[8] + '/' + pathTokens[9] + '/' + pathTokens[10]
 
+            #print('Path RGB ', lineTokens[0])
+            #print('Path Flow ', pathFLow)
             net, flag = netForward(net, transformerFLOW, transformerRGB, lineTokens[0], pathFLow)
 
             #print (out['loss'])
