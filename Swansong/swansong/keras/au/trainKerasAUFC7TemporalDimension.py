@@ -1,15 +1,13 @@
-from keras.layers import Activation
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import LSTM
-from keras.layers.convolutional import MaxPooling1D
-from keras.layers.wrappers import TimeDistributed
 from keras.models import Sequential
 from keras.optimizers import SGD
 import numpy as np
 import os
 import random
 import re
+from sklearn.metrics import classification_report
 
 auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
 
