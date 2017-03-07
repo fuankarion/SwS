@@ -36,7 +36,7 @@ tasksTest = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11',
 trainFeatsUnbalanced, trainLabelsUnbalanced = loadSet(trainSubjectsFold0, tasksTrain, txtFeatsTrainDir, view, K, bulkLoadDirTrain, au)
 print('Unablanced samples')
 negProportion, posProportion = getCounts(trainLabelsUnbalanced)
-trainFeats, trainLabels = balanceSet(trainFeatsUnbalanced, trainLabelsUnbalanced, negProportion, 0.25)
+trainFeats, trainLabels = balanceSet(trainFeatsUnbalanced, trainLabelsUnbalanced, negProportion, 0.35)
 #Recalc
 print('Rebalanced samples')
 negProportion, posProportion = getCounts(trainLabels)
@@ -47,9 +47,9 @@ model.add(Dense(2, activation='sigmoid', input_shape=(K, 2), init='uniform'))
 
 model.add(Dense(2, activation='sigmoid', init='uniform'))
 
-#model.add(Dense(2, activation='sigmoid', init='uniform'))
+model.add(Dense(2, activation='sigmoid', init='uniform'))
 
-model.add(LSTM(3))
+model.add(LSTM(10))
 model.add(Dense(1, activation='sigmoid'))
 
 sgd = SGD(lr=0.01, momentum=0.9, nesterov=True)
