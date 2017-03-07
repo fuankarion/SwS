@@ -13,9 +13,9 @@ import matlab
 caffe.set_device(1)
 caffe.set_mode_gpu()
 
+auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
 
 def loadNetModel(auName, view, modelsRootPath):
-    #TODO this is a param
     tagetModels = modelsRootPath + view + '/' + auName + '/*.caffemodel'
     print('tagetModels ', tagetModels)
     modelCand = glob.glob(tagetModels)
@@ -64,7 +64,7 @@ def netForward(net, transformerFLOW, transformerRGB, imgRGB, imgFLow):
     return net, True
 
 
-def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFLow):
+def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFLow, layer,au):
     gts = []
     preds = []
     scores = []
@@ -102,14 +102,20 @@ def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForwar
                              + ',' + lineTokens[6] + ',' + lineTokens[7] + ',' + lineTokens[8] 
                              + ',' + lineTokens[9] + ',' + lineTokens[10])
                              
-                             
-            gts.append(int(lineTokens[1]))
+                         
+            auIdx = auArray.index(au)
+            gts.append(int(lineTokens[auIdx+1]))
             preds.append(net.blobs['softmax'].data[0].argmax())
             scores.append(net.blobs['softmax'].data[0][1])
 
-            softMaxFeat = net.blobs['softmax'].data[0].flatten()#just in case
+            feat = net.blobs[layer].data[0].flatten()#just in case
+            
+            #print(' ')
+            #print('softmax ', net.blobs['softmax'].data[0])
+            #print('feat ', feat)
+            #print('finalTargetForward ',finalTargetForward )
             with open(finalTargetForward, 'wb') as myFile:
-                np.savetxt(myFile, softMaxFeat, delimiter=",")
+                np.savetxt(myFile, feat, delimiter=",")
 
             if idx % 200 == 0:
                 print('Forwards ', idx)
