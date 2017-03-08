@@ -4,8 +4,8 @@ sys.path.append('../')
 from forwardCore import *
 
 #exec
-auName = 'AU01'
-view = 'v1'
+auName = 'AU02'
+view = 'v2'
 fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Training.txt'
 modelsRootPath = '/home/jcleon/fold/fold_0/'
 layerData = 'softmax'

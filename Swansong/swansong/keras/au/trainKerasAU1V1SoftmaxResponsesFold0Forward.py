@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.metrics import classification_report
 from trainCore import *
 
-K = 40
+K = 50
 au = 'AU01'
 view = 'v1'
 

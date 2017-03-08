@@ -6,7 +6,7 @@ from trainCore import *
 import matlab.engine
 import matlab
 
-K = 40
+K = 50
 au = 'AU01'
 view = 'v1'
 jointModel = load_model('/home/jcleon/Storage/ssd0/ModelsLSTM/evenWithForwardK'+str(K)+'.h5')

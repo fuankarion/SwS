@@ -3,7 +3,7 @@ from shutil import copyfile
 from string import Template
 import subprocess
 
-binaryPath = './broxDir'
+binaryPath = '/home/jcleon/DAKode/BroxOFGPU2/broxDir'
 processes = set()
 max_processes = 50
 
@@ -27,10 +27,10 @@ def fillFinalImageInDir(path):
         print('Ignore')
         
         
-def calculateOFBroxGPUAnSet(sourceDir, targetDir, original):    
+def calculateOFBroxGPUAnSet(sourceDir, targetDir):    
     print('calculateOFBroxGPUAnSet')   
-    print('sourceDir ',sourceDir)
-    print('targetDir ',targetDir)
+    print('sourceDir ', sourceDir)
+    print('targetDir ', targetDir)
         
     if not os.path.exists(targetDir):
         os.makedirs(targetDir)
@@ -39,7 +39,7 @@ def calculateOFBroxGPUAnSet(sourceDir, targetDir, original):
     numFilesSource = len([f for f in os.listdir(sourceDir) if os.path.isfile(os.path.join(sourceDir, f))])
     numFilesTarget = len([f for f in os.listdir(targetDir) if os.path.isfile(os.path.join(targetDir, f))])
 
-    if numfilesOriginal != numFilesSource:
+    if numFilesSource != numFilesTarget:
         print('numFilesSource', numFilesSource)
         print('numFilesTarget', numFilesTarget)
 
@@ -47,24 +47,38 @@ def calculateOFBroxGPUAnSet(sourceDir, targetDir, original):
         issueFlowCommandToPool(sourceDir, targetDir)
     elif numFilesSource == numFilesTarget + 1:#Just Fix
 	fillFinalImageInDir(targetDir)
+    else:
+        print('Done with ',sourceDir)
 
+
+def handleViews(taskSourceDir, taskTargetDir):
+    views = os.listdir(taskSourceDir)
+    
+    for aView in views:
+        print('Process view', aView)
+        viewSourceDir = os.path.join(taskSourceDir, aView)
+        viewTargetDir = os.path.join(taskTargetDir, aView)
+
+        calculateOFBroxGPUAnSet(viewSourceDir, viewTargetDir)
         
-def handleTasksForPerson(aPersonDir, targetPerson):
-    tasks = os.listdir(aPersonDir)
+                
+def handleTasksForPerson(personSoruceDir, personTargetDir):
+    tasks = os.listdir(personSoruceDir)
 
     for aTask in tasks:
- 	calculateOFBroxGPUAnSet(os.path.join(aPersonDir, aTask), os.path.join(targetPerson, aTask))
+        print('Process task', aTask)
+        handleViews(os.path.join(personSoruceDir, aTask), os.path.join(personTargetDir, aTask))
+ 	
       
-def handleSubjects(rootPath, targetRoot): 
-    persons = os.listdir(rootPath)
-    #print('len(dirs)', len(persons))
+def handleSubjects(sourceRoot, targetRoot): 
+    persons = os.listdir(sourceRoot)
     for aPerson in persons:
-        #print('process person', aPerson)
-        handleTasksForPerson(os.path.join(rootPath, aPerson), os.path.join(targetRoot, aPerson), os.path.join(original, aPerson))
+        print('Process person', aPerson)
+        handleTasksForPerson(os.path.join(sourceRoot, aPerson), os.path.join(targetRoot, aPerson))
           
 #root of the directory hierachy
-sourcePath = '/home/jcleon/Storage/disk2/resizedFera17-256'
-targetBase = '/home/afromero/datos/Databases/BP4D/SequencesResizedFlow'
+sourcePath = '/home/jcleon/Storage/disk2/resizedFera17-256/Train'
+targetBase = '/home/jcleon/Storage/disk2/resizedFera17-256Flow/Train'
 
 handleSubjects(sourcePath, targetBase)
 
