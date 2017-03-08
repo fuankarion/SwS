@@ -63,7 +63,7 @@ def handleSubjects(rootPath, targetRoot):
         handleTasksForPerson(os.path.join(rootPath, aPerson), os.path.join(targetRoot, aPerson), os.path.join(original, aPerson))
           
 #root of the directory hierachy
-sourcePath = '/home/afromero/datos/Databases/BP4D/SequencesResized'
+sourcePath = '/home/jcleon/Storage/disk2/resizedFera17-256'
 targetBase = '/home/afromero/datos/Databases/BP4D/SequencesResizedFlow'
 
 handleSubjects(sourcePath, targetBase)

@@ -1,13 +1,14 @@
 from keras.callbacks import *
 from keras.layers import Dense
 from keras.layers import LSTM
+from keras.layers import Merge
 from keras.models import Sequential
 from keras.optimizers import SGD
 import numpy as np
 from sklearn.metrics import classification_report
 from trainCore import *
 
-K = 3
+K = 40
 au = 'AU01'
 view = 'v1'
 
@@ -42,31 +43,38 @@ print('Rebalanced samples')
 negProportion, posProportion = getCounts(trainLabels)
 
 ###Kerasmodel
-model = Sequential()
-model.add(Dense(2, activation='sigmoid', input_shape=(K, 2), init='uniform'))
+reluBranch = Sequential()
+reluBranch.add(Dense(2, activation='relu', input_shape=(K, 2), init='uniform'))
+reluBranch.add(Dense(16, activation='sigmoid', init='uniform'))
+reluBranch.add(Dense(8, activation='relu', init='uniform'))
 
-model.add(Dense(2, activation='sigmoid', init='uniform'))
+sigmoidBranch = Sequential()
+sigmoidBranch.add(Dense(2, activation='sigmoid', input_shape=(K, 2), init='uniform'))
+sigmoidBranch.add(Dense(16, activation='relu', init='uniform'))
+sigmoidBranch.add(Dense(8, activation='sigmoid', init='uniform'))
 
-model.add(Dense(2, activation='sigmoid', init='uniform'))
+merged = Merge([reluBranch, sigmoidBranch], mode='concat')
 
-model.add(LSTM(10))
-model.add(Dense(1, activation='sigmoid'))
+jointModel = Sequential()
+jointModel.add(merged)
+jointModel.add(LSTM(10))
+jointModel.add(Dense(1, activation='sigmoid'))
 
 sgd = SGD(lr=0.01, momentum=0.9, nesterov=True)
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'fmeasure'])
-print(model.summary())
+jointModel.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'fmeasure'])
+print(jointModel.summary())
 
 classWeights = {0: (1-negProportion) * 1, 1: (1-posProportion) * 1}
 print('classWeights', classWeights)
 #model.fit(trainFeats, trainLabels, nb_epoch=150, batch_size=2000, verbose=1, class_weight=classWeights)
-model.fit(trainFeats, trainLabels, nb_epoch=150, batch_size=3000, verbose=1)
+jointModel.fit([trainFeats, trainFeats], trainLabels, nb_epoch=150, batch_size=6000, verbose=1)
 
 gtMax = []
 predsMax = []
 for anIdx in range(0, trainLabels.shape[0]):
     #print(trainFeats[anIdx,0,:],' max ', np.argmax(trainFeats[anIdx,0,:]),' gt ',testLabels[anIdx])
     gtMax.append(trainLabels[anIdx])
-    predsMax.append(np.argmax(trainFeats[anIdx, 0, :]) % 2)
+    predsMax.append(np.argmax(trainFeats[anIdx, 0,:]) % 2)
     #print(trainLabels[anIdx,1,:])
     
 testFeats, testLabels = loadSet(testSubjects, tasksTest, txtFeatsTestDir, view, K, bulkLoadDirVal, au)
@@ -82,12 +90,12 @@ print('Classification MAX Score Train Balanced')
 getClassificationScoreMaxCriteria(trainFeats, trainLabels)
 
 print('LSTM Classficiation Train Set')
-preds = model.predict_classes(trainFeats)
+preds = jointModel.predict_classes([trainFeats, trainFeats])
 print(' ')
 print(classification_report(trainLabels, preds))
 
 print('LSTM Classficiation Val Set')
-preds = model.predict_classes(testFeats)
+preds = jointModel.predict_classes([testFeats, testFeats])
 print(' ')
 print(classification_report(testLabels, preds))
 
@@ -97,3 +105,4 @@ print('Classification MAX Score Val UNBalanced')
 getClassificationScoreMaxCriteria(testFeats, testLabels)
 
 
+jointModel.save('/home/jcleon/Storage/ssd0/ModelsLSTM/evenWithForwardK'+str(K)+'.h5') 

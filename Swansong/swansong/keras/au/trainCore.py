@@ -1,8 +1,8 @@
 import numpy as np
 import os
+import random
 import re
 from sklearn.metrics import classification_report
-import random
 
 
 auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
@@ -16,10 +16,10 @@ def getCounts(labels):
     negProportion = float(labelDist[0]) / float(labelDist[0] + labelDist[1])
     posProportion = float(labelDist[1]) / float(labelDist[0] + labelDist[1])
     print(np.bincount(labels))
-    return negProportion,posProportion
+    return negProportion, posProportion
     
     
-def balanceSet(feats, labels, negProportion,thresholdMultiplier):
+def balanceSet(feats, labels, negProportion, thresholdMultiplier):
     deleteIdx = []
     for rowDeleteIdx in range(0, labels.shape[0]):
         if labels[rowDeleteIdx] == 0:
@@ -38,10 +38,11 @@ def getClassificationScoreMaxCriteria(feats, labels):
     predsMax = []
     for anIdx in range(0, feats.shape[0]):
         gtMax.append(labels[anIdx])
-        predsMax.append(np.argmax(feats[anIdx, :]) % 2)
+        predsMax.append(np.argmax(feats[anIdx,:]) % 2)
    
     cr = classification_report(gtMax, predsMax)
     print(cr)
+    return predsMax
 
 def writeBulkLoadFeats(bulkLoadDir, aSubject, aTask, view, K, data, extra):
     bulkLoadFile = bulkLoadDir + '/' + aSubject + '-' + aTask + '-' + view + '-' + extra  + str(K)
@@ -77,7 +78,7 @@ def loadFeats(rootPath, aSubject, aTask, view, K, bulkLoadDir, extra, au):
         tempPath = os.path.join(txtFilesPath, aFile)
         tempFeats = np.loadtxt(tempPath)
         
-        allfeats[idx, :] = tempFeats
+        allfeats[idx,:] = tempFeats
         idx = idx + 1
         if idx % 100 == 0:
             print(idx, '/', len(allFilesInDir))
@@ -120,8 +121,8 @@ def reshapeTrainData(feats, labels, K):
         midOne = targetIndexes[len(targetIndexes) / 2]
         
         #Feats
-        segment = feats[targetIndexes, :]
-        reshaped[startIdx, :, :] = segment
+        segment = feats[targetIndexes,:]
+        reshaped[startIdx,:,:] = segment
         
         #Labels
         labelSegment = labels[midOne]
