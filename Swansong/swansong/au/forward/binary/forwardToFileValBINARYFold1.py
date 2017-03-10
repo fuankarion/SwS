@@ -4,10 +4,10 @@ sys.path.append('../')
 from forwardCore import *
 
 #exec
-auName = 'AU02'
+auName = 'AU04'
 view = 'v2'
 fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Test.txt'
-modelsRootPath = '/home/jcleon/fold/fold_1/'
+modelsRootPath = '/home/jcleon/Storage/disk2/foldFera17/fold_1/'
 layerData = 'softmax'
 
 basePathFlow = '/home/jcleon/Storage/ssd0/Flow/Val'

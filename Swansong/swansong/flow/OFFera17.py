@@ -77,10 +77,36 @@ def handleSubjects(sourceRoot, targetRoot):
         handleTasksForPerson(os.path.join(sourceRoot, aPerson), os.path.join(targetRoot, aPerson))
           
 #root of the directory hierachy
-sourcePath = '/home/jcleon/Storage/disk2/resizedFera17-256/Train'
-targetBase = '/home/jcleon/Storage/disk2/resizedFera17-256Flow/Train'
 
+"""
+sourcePath = '/home/jcleon/Storage/disk2/resizedFera17-512/Valid'
+targetBase = '/home/jcleon/Storage/disk2/resizedFera17-512Flow/Valid'
+handleSubjects(sourcePath, targetBase)
+"""
+
+
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_0'
+targetBase = '/home/jcleon/Storage/disk2/Jitter/Jitter_0Flow'
 handleSubjects(sourcePath, targetBase)
 
 
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_1'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_1'
+handleSubjects(sourcePath, targetBase)
+
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_2'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_2'
+handleSubjects(sourcePath, targetBase)
+
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_4'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_4'
+handleSubjects(sourcePath, targetBase)
+
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_5'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_5'
+handleSubjects(sourcePath, targetBase)
+
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_6'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_6'
+handleSubjects(sourcePath, targetBase)
     
