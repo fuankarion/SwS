@@ -11,7 +11,7 @@ from trainCore import *
 K = 50
 au = 'AU01'
 view = 'v1'
-modelSaveTo='/home/jcleon/Storage/ssd0/ModelsLSTM/evenWithForwardK'
+modelSaveTo = '/home/jcleon/Storage/ssd0/ModelsLSTM/' + au + '-' + view + '-K' + str(K) + '.h5'
 
 """
 txtFeatsTrainDir = '/home/jcleon/Storage/ssd0/FeatsTrain/SoftMaxActivations/AU01_v1_Fold0'
@@ -101,4 +101,4 @@ print('Classification MAX Score Val UNBalanced')
 getClassificationScoreMaxCriteria(testFeats, testLabels)
 
 
-jointModel.save(+str(K)+'.h5') 
+jointModel.save(modelSaveTo) 
