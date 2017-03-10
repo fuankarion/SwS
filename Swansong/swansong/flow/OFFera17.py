@@ -85,28 +85,28 @@ handleSubjects(sourcePath, targetBase)
 """
 
 
-sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_0'
-targetBase = '/home/jcleon/Storage/disk2/Jitter/Jitter_0Flow'
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_0/Train'
+targetBase = '/home/jcleon/Storage/disk2/Jitter/Jitter_0Flow/Train'
 handleSubjects(sourcePath, targetBase)
 
 
-sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_1'
-targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_1'
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_1/Train'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_1/Train'
 handleSubjects(sourcePath, targetBase)
 
-sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_2'
-targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_2'
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_2/Train'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_2/Train'
 handleSubjects(sourcePath, targetBase)
 
-sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_4'
-targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_4'
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_4/Train'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_4/Train'
 handleSubjects(sourcePath, targetBase)
 
-sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_5'
-targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_5'
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_5/Train'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_5/Train'
 handleSubjects(sourcePath, targetBase)
 
-sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_6'
-targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_6'
+sourcePath = '/home/jcleon/Storage/disk2/Jitter/Jitter_6/Train'
+targetBase = '/home/jcleon/Storage/disk2/JitterFlow/Jitter_6/Train'
 handleSubjects(sourcePath, targetBase)
     

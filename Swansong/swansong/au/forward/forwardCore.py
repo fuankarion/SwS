@@ -13,11 +13,11 @@ import matlab
 caffe.set_device(1)
 caffe.set_mode_gpu()
 
+#Globals
 auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
 
 def loadNetModel(auName, view, modelsRootPath):
-    tagetModels = modelsRootPath + view + '/' + auName + '/*.caffemodel'
-    print('tagetModels ', tagetModels)
+    tagetModels = modelsRootPath + '/' + view + '/' + auName + '/*.caffemodel'
     modelCand = glob.glob(tagetModels)
     print('Load model ', modelCand[0])
     net = caffe.Net('/home/jcleon/Storage/disk2/ModeslAFConcat2/deploy_Test.prototxt',
@@ -64,63 +64,144 @@ def netForward(net, transformerFLOW, transformerRGB, imgRGB, imgFLow):
     return net, True
 
 
-def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFLow, layer,au):
+def convertPaths(RGBPath, flowPath, trainFilesBase, baseJitterImagesPath):
+    
+    if '/home/afromero/Codes/FERA17/data/Faces/FERA17/BP4D/Train' in RGBPath:
+        RGBPath = RGBPath.replace('/home/afromero/Codes/FERA17/data/Faces/FERA17/BP4D', trainFilesBase)
+    elif '/home/afromero/Codes/FERA17/data/Faces/FERA17/BP4D/Jitter' in RGBPath:
+        RGBPath = RGBPath.replace('/home/afromero/Codes/FERA17/data/Faces/FERA17/BP4D/Jitter', baseJitterImagesPath)
+        jitterTokens = RGBPath.split('/')
+        #print('Before ',flowPath)
+        flowPath = flowPath.replace('/home/jcleon/Storage/disk2/resizedFera17-256Flow//Train', '/home/jcleon/Storage/disk2/Jitter/' + jitterTokens[6] + '/Train_Flow512')
+        
+    return RGBPath, flowPath
+        
+        
+def getConvertedPathsFromGTLine(aLine, baseFlowImagesPath, baseRGBImagesPath, baseJitterImagesPath):
+    lineTokens = aLine.split(' ')
+    pathTokens = lineTokens[0].split('/')
+    pathFLow = baseFlowImagesPath + '/' + pathTokens[-5] + '/' + pathTokens[-4] + '/' + pathTokens[-3] + '/' + pathTokens[-2] + '/' + pathTokens[-1]
+    convertedRGBPath, convertedFlowPath = convertPaths(lineTokens[0], pathFLow, baseRGBImagesPath, baseJitterImagesPath)
+    
+    """
+    print(' ')
+    print('lineTokens[0] ', lineTokens[0])
+    print('pathFLow', pathFLow)
+    print('baseRGBImagesPath ', baseRGBImagesPath)
+    
+    print('convertedRGBPath ', convertedRGBPath)
+    print('convertedFlowPath ', convertedFlowPath)
+    print(' ')
+    """
+    
+    return convertedRGBPath, convertedFlowPath 
+
+
+def getTargetForward(aLine, targetForward):
+    lineTokens = aLine.split(' ')
+    pathTokens = lineTokens[0].split('/')
+    
+    print
+    jitterToken = pathTokens[8]
+    print('targetForward ', targetForward)
+    dirTargetForward = targetForward + '/' + pathTokens[-4] + '/' + pathTokens[-3] + '/' + pathTokens[-2]
+    if not os.path.exists(dirTargetForward):
+        os.makedirs(dirTargetForward)
+        print ('created ', dirTargetForward)
+    finalTargetForward = dirTargetForward + '/' + pathTokens[-1][:-4] + '.txt'
+    if jitterToken == 'Jitter':
+        finalTargetForward = dirTargetForward + '/' + pathTokens[9] + pathTokens[-1][:-4] + '.txt'
+    
+    return dirTargetForward, finalTargetForward
+
+def getFileNameAndLabel(aLine):    
+    tokensSpace = aLine.split(' ')
+    label = tokensSpace[1]
+    tokensName = tokensSpace[0].split('/')
+    imgName = tokensName[-1]
+    return imgName, label
+    
+def forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, layerData, 
+                      au, baseRGBImagesPath, baseJitterImagesPath):
     gts = []
     preds = []
     scores = []
+    
+    net = netParams[0]
+    transformerRGB = netParams[1]
+    transformerFLOW = netParams[2]
       
     with open(fileGT) as f:
         content = f.readlines()
 
         idx = 0
         for aLine in content:
-            lineTokens = aLine.split(' ')
-            pathTokens = lineTokens[0].split('/')
+            convertedRGBPath, convertedFlowPath = getConvertedPathsFromGTLine(aLine, baseFlowImagesPath, baseRGBImagesPath, baseJitterImagesPath)
+            net, flag = netForward(net, transformerFLOW, transformerRGB, convertedRGBPath, convertedFlowPath)
 
-            pathFLow = basePathFLow + '/' + pathTokens[7] + '/' + pathTokens[8] + '/' + pathTokens[9] + '/' + pathTokens[10]
-
-            #print('Path RGB ', lineTokens[0])
-            #print('Path Flow ', pathFLow)
-            net, flag = netForward(net, transformerFLOW, transformerRGB, lineTokens[0], pathFLow)
-
-            #print (out['loss'])
-            if flag == False:
-                print('Pair not found for ', lineTokens[0])
+            if flag == False:       
+                print('Pair not found for ', convertedRGBPath, convertedFlowPath)
                 continue	
+           
+           
+            
+            dirTargetForward, finalTargetForward = getTargetForward(aLine, targetForward)
+            targetLabels = dirTargetForward + '/labels.txt'
 
-            tempTargetForward = targetForward + '/' + pathTokens[7] + '/' + pathTokens[8] + '/' + pathTokens[9]
-            if not os.path.exists(tempTargetForward):
-                os.makedirs(tempTargetForward)
-                print ('created ', tempTargetForward)
-
-            finalTargetForward = tempTargetForward + '/' + pathTokens[10][:-4] + '.txt'
-            targetLabels = tempTargetForward + '/labels.txt'
+             
+            print('convertedRGBPath ', convertedRGBPath)
+            print('convertedFlowPath ', convertedFlowPath)
+            print('dirTargetForward ', dirTargetForward)
+            print('finalTargetForward ', finalTargetForward)
+            print('OK ')
 
             with open(targetLabels, 'a') as gtFile:
-                gtFile.write(pathTokens[10] + ',' + lineTokens[1] + ',' + lineTokens[2] 
-                             + ',' + lineTokens[3] + ',' + lineTokens[4] + ',' + lineTokens[5] 
-                             + ',' + lineTokens[6] + ',' + lineTokens[7] + ',' + lineTokens[8] 
-                             + ',' + lineTokens[9] + ',' + lineTokens[10])
+                imgName, label = getFileNameAndLabel(aLine)
+                gtFile.write(imgName + ',' + label)
                              
-                         
-            auIdx = auArray.index(au)
-            gts.append(int(lineTokens[auIdx+1]))
+            gts.append(int(label))
             preds.append(net.blobs['softmax'].data[0].argmax())
             scores.append(net.blobs['softmax'].data[0][1])
 
-            feat = net.blobs[layer].data[0].flatten()#just in case
+            feat = net.blobs[layerData].data[0].flatten()#just in case
             
-            #print(' ')
-            #print('softmax ', net.blobs['softmax'].data[0])
-            #print('feat ', feat)
-            #print('finalTargetForward ',finalTargetForward )
+            
             with open(finalTargetForward, 'wb') as myFile:
                 np.savetxt(myFile, feat, delimiter=",")
 
-            if idx % 200 == 0:
-                print('Forwards ', idx)
+            if idx % 200 == 0 and idx > 0:
                 print(classification_report(gts, preds))
                
             idx = idx + 1
          
     return gts, preds, scores
+
+def forwardAUViewFold(au, view, fold, targetSet, trainFilesDir, baseTargetForward,
+                      layerData, foldModelsPath, baseFlowImagesPath, baseRGBImagesPath, baseJitterImagesPath):
+    auOhne0 = au.replace('0', '')
+    
+    fileGT = trainFilesDir + view + '/Training_' + auOhne0 + '.txt'
+    modelsRootPath = foldModelsPath + '/fold_' + str(fold)
+    targetForward = baseTargetForward + '/' + targetSet + '/' + au + '_' + view + '_Fold' + str(fold)
+    
+    print('fileGT ', fileGT)
+    print('modelsRootPath ', modelsRootPath)
+    print('targetForward ', targetForward)
+    
+    net = loadNetModel(au, view, modelsRootPath)
+    transformerFLOW, transformerRGB = createTransformers(net)
+
+    netParams = [net, transformerRGB, transformerFLOW]
+    
+
+    gts, preds, scores = forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, layerData,
+                                           au, baseRGBImagesPath, baseJitterImagesPath)
+
+    eng = matlab.engine.start_matlab()
+    cs = classification_report(gts, preds)
+    ps = eng.CalcRankPerformance(matlab.int8(gts), matlab.double(scores), 1, 'All')
+    F1_MAX = max(np.array(ps['F1']))[0]
+
+    with open(targetForward + '/overalReport.txt', 'a') as reportFile:
+        reportFile.write(str(cs) + ' \n ' + ' F1Max: ' + str(F1_MAX))
+        

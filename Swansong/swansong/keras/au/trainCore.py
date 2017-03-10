@@ -190,3 +190,14 @@ def loadSet(subjects, tasks, txtDir, view, K, bulkLoadDir, au):
             print('trainFeats.shape', trainFeats.shape)
     
     return trainFeats, trainLabels
+
+
+def rebalanceFeats():
+    #get and balance train set
+    
+    print('Unablanced samples')
+    negProportion, posProportion = getCounts(trainLabelsUnbalanced)
+    trainFeats, trainLabels = balanceSet(trainFeatsUnbalanced, trainLabelsUnbalanced, negProportion, 0.35)
+    #Recalc
+    print('Rebalanced samples')
+    negProportion, posProportion = getCounts(trainLabels)
