@@ -102,15 +102,16 @@ def getTargetForward(aLine, targetForward):
     pathTokens = lineTokens[0].split('/')
     
     print
-    jitterToken = pathTokens[8]
+    jitterToken = pathTokens[9]
     print('targetForward ', targetForward)
     dirTargetForward = targetForward + '/' + pathTokens[-4] + '/' + pathTokens[-3] + '/' + pathTokens[-2]
     if not os.path.exists(dirTargetForward):
         os.makedirs(dirTargetForward)
         print ('created ', dirTargetForward)
     finalTargetForward = dirTargetForward + '/' + pathTokens[-1][:-4] + '.txt'
+    print('jitterToken ', jitterToken)
     if jitterToken == 'Jitter':
-        finalTargetForward = dirTargetForward + '/' + pathTokens[9] + pathTokens[-1][:-4] + '.txt'
+        finalTargetForward = dirTargetForward + '/' + pathTokens[-1][:-4] + '_' + pathTokens[10] + '.txt'
     
     return dirTargetForward, finalTargetForward
 
@@ -143,11 +144,8 @@ def forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, laye
                 print('Pair not found for ', convertedRGBPath, convertedFlowPath)
                 continue	
            
-           
-            
             dirTargetForward, finalTargetForward = getTargetForward(aLine, targetForward)
             targetLabels = dirTargetForward + '/labels.txt'
-
              
             print('convertedRGBPath ', convertedRGBPath)
             print('convertedFlowPath ', convertedFlowPath)
@@ -157,7 +155,9 @@ def forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, laye
 
             with open(targetLabels, 'a') as gtFile:
                 imgName, label = getFileNameAndLabel(aLine)
-                gtFile.write(imgName + ',' + label)
+                tokensFTF = finalTargetForward.split('/')
+                fileName = tokensFTF[-1][:-4]
+                gtFile.write(fileName + '.jpg' + ',' + label)
                              
             gts.append(int(label))
             preds.append(net.blobs['softmax'].data[0].argmax())
