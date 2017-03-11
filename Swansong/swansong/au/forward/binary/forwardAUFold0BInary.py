@@ -19,10 +19,12 @@ baseRGBImagesPath = '/home/jcleon/Storage/ssd0/RGB/'
 baseFlowImagesPath = '/home/jcleon/Storage/disk2/resizedFera17-256Flow/'
 baseJitterImagesPath = '/home/jcleon/Storage/disk2/Jitter'#Works also for flow
 
+fold=0
+
 #allways forward with fold0 the train on fold1
 for anAU in aus:
     for aView in views:
-        forwardAUViewFold(anAU, aView, 0, 'Train', trainFilesDir, baseTargetForward, 
+        forwardAUViewFold(anAU, aView, fold, 'Train', trainFilesDir, baseTargetForward, 
                           layerData, foldModelsPath, baseFlowImagesPath, baseRGBImagesPath, baseJitterImagesPath)
        
       

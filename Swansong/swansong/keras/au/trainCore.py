@@ -3,6 +3,15 @@ import os
 import random
 import re
 from sklearn.metrics import classification_report
+from keras.callbacks import *
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Merge
+from keras.models import Sequential
+from keras.optimizers import SGD
+import numpy as np
+from sklearn.metrics import classification_report
+from trainCore import *
 
 
 auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
@@ -201,3 +210,91 @@ def rebalanceFeats():
     #Recalc
     print('Rebalanced samples')
     negProportion, posProportion = getCounts(trainLabels)
+    
+def trainLSTMModel(au, view, trainFold, jointModel, steps,baseFeatsDir):
+
+    txtFeatsTrainDir = baseFeatsDir + '/' + au + '_' + view + '_Fold' + str(trainFold)
+
+    bulkLoadDirTrain = '/home/jcleon/Storage/ssd0/BL/bulkLoad' + au + view + 'fold' + str(trainFold) + '/Train'
+    if not os.path.exists(bulkLoadDirTrain):
+        os.makedirs(bulkLoadDirTrain)
+        
+   
+
+    trainSubject = None
+    if trainFold == 0:
+        trainSubjects = ['M012', 'M017', 'M006', 'M008', 'M002', 'F016', 'F011', 'M015', 'M016', 'F006', 'M011', 'F008', 'F003', 'M009', 'F002', 'M003', 'M014', 'F023', 'F015', 'F021']
+    if trainFold == 1:
+        trainSubjects = ['F022', 'F013', 'F010', 'F007', 'M005', 'F012', 'F019', 'F005', 'M004', 'M018', 'F020', 'F001', 'F014', 'F004', 'F017', 'F009', 'M001', 'M010', 'M007', 'M013', 'F018']
+
+    tasksTrain = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14', 'T15']
+    
+
+    #get and balance train set
+    trainFeatsUnbalanced, trainLabelsUnbalanced = loadSet(trainSubjects, tasksTrain, txtFeatsTrainDir, view, steps, bulkLoadDirTrain, au)
+    print('Unablanced samples')
+    negProportion, posProportion = getCounts(trainLabelsUnbalanced)
+
+    jointModel.fit([trainFeatsUnbalanced, trainFeatsUnbalanced], trainLabelsUnbalanced, nb_epoch=150, batch_size=6000, verbose=1)
+    return jointModel, trainLabelsUnbalanced, trainFeatsUnbalanced
+
+def evalModel(au, view, evalFold, trainedModel, trainLabelsUnbalanced, trainFeatsUnbalanced, steps,baseFeatsDir):
+    gtMax = []
+    predsMax = []
+    for anIdx in range(0, trainLabelsUnbalanced.shape[0]):
+        gtMax.append(trainLabelsUnbalanced[anIdx])
+        predsMax.append(np.argmax(trainFeatsUnbalanced[anIdx, 0, :]) % 2)
+    
+    #Val subjects
+    testSubjects = ['F007', 'F008', 'F009', 'F010', 'F011', 'M001', 'M002', 'M003', 'M004', 'M005', 'M006', 'rF001', 'rF002', 'rM001', 'rM002', 'rM003', 'rM004', 'rM005', 'rM006', 'rM007']
+    tasksVal = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14', 'T15']
+    
+    bulkLoadDirVal = '/home/jcleon/Storage/ssd0/BL/bulkLoad' + au + view + 'fold' + str(evalFold) + '/Val'
+    if not os.path.exists(bulkLoadDirVal):
+        os.makedirs(bulkLoadDirVal)
+    txtFeatsTestDir = baseFeatsDir + '/' + au + '_' + view + '_Fold' + str(evalFold)
+    testFeats, testLabels = loadSet(testSubjects, tasksVal, txtFeatsTestDir, view, steps, bulkLoadDirVal, au)
+
+    print('Counts Train Full')
+    negProportion, posProportion = getCounts(trainLabelsUnbalanced)
+    print('Classification MAX Score Train Full')
+    getClassificationScoreMaxCriteria(trainFeatsUnbalanced, trainLabelsUnbalanced)
+
+    print('LSTM Classficiation Train Set')
+    preds = trainedModel.predict_classes([trainFeatsUnbalanced, trainFeatsUnbalanced])
+    print(' ')
+    print(classification_report(trainLabelsUnbalanced, preds))
+
+    print('LSTM Classficiation Val Set')
+    preds = trainedModel.predict_classes([testFeats, testFeats])
+    print(' ')
+    print(classification_report(testLabels, preds))
+
+    print('Counts Val UNBalanced')
+    getCounts(testLabels)
+    print('Classification MAX Score Val UNBalanced')
+    getClassificationScoreMaxCriteria(testFeats, testLabels)
+
+def createModel(timeSteps):
+    ###Kerasmodel
+    reluBranch = Sequential()
+    reluBranch.add(Dense(2, activation='relu', input_shape=(timeSteps, 2), init='uniform'))
+    reluBranch.add(Dense(16, activation='sigmoid', init='uniform'))
+    reluBranch.add(Dense(8, activation='relu', init='uniform'))
+
+    sigmoidBranch = Sequential()
+    sigmoidBranch.add(Dense(2, activation='sigmoid', input_shape=(timeSteps, 2), init='uniform'))
+    sigmoidBranch.add(Dense(16, activation='relu', init='uniform'))
+    sigmoidBranch.add(Dense(8, activation='sigmoid', init='uniform'))
+
+    merged = Merge([reluBranch, sigmoidBranch], mode='concat')
+
+    jointModel = Sequential()
+    jointModel.add(merged)
+    jointModel.add(LSTM(10))
+    jointModel.add(Dense(1, activation='sigmoid'))
+
+    sgd = SGD(lr=0.01, momentum=0.9, nesterov=True)
+    jointModel.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', 'fmeasure'])
+    print(jointModel.summary())
+    return jointModel
