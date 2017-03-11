@@ -9,6 +9,7 @@ from forwardCore import *
 
 aus = ['AU01']
 views = ['v1']
+fold=0
 
 trainFilesDir = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/'
 foldModelsPath = '/home/jcleon/Storage/disk2/foldModelsFera17'
@@ -19,7 +20,7 @@ baseRGBImagesPath = '/home/jcleon/Storage/ssd0/RGB/'
 baseFlowImagesPath = '/home/jcleon/Storage/disk2/resizedFera17-256Flow/'
 baseJitterImagesPath = '/home/jcleon/Storage/disk2/Jitter'#Works also for flow
 
-fold=0
+
 
 #allways forward with fold0 the train on fold1
 for anAU in aus:
