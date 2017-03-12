@@ -12,7 +12,7 @@ views = ['v1']
 fold=0
 
 trainFilesDir = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/'
-foldModelsPath = '/home/jcleon/Storage/disk2/foldModelsFera17'
+foldModelsPath = '/home/jcleon/Storage/disk2/fold'
 layerData = 'softmax'
 baseTargetForward = '/home/jcleon/Storage/disk2/foldFeats'
 

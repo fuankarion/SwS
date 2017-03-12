@@ -103,13 +103,13 @@ def getTargetForward(aLine, targetForward):
     
     print
     jitterToken = pathTokens[9]
-    print('targetForward ', targetForward)
+    #print('targetForward ', targetForward)
     dirTargetForward = targetForward + '/' + pathTokens[-4] + '/' + pathTokens[-3] + '/' + pathTokens[-2]
     if not os.path.exists(dirTargetForward):
         os.makedirs(dirTargetForward)
         print ('created ', dirTargetForward)
     finalTargetForward = dirTargetForward + '/' + pathTokens[-1][:-4] + '.txt'
-    print('jitterToken ', jitterToken)
+    #print('jitterToken ', jitterToken)
     if jitterToken == 'Jitter':
         finalTargetForward = dirTargetForward + '/' + pathTokens[-1][:-4] + '_' + pathTokens[10] + '.txt'
     
@@ -147,11 +147,13 @@ def forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, laye
             dirTargetForward, finalTargetForward = getTargetForward(aLine, targetForward)
             targetLabels = dirTargetForward + '/labels.txt'
              
+            """
             print('convertedRGBPath ', convertedRGBPath)
             print('convertedFlowPath ', convertedFlowPath)
             print('dirTargetForward ', dirTargetForward)
             print('finalTargetForward ', finalTargetForward)
             print('OK ')
+            """
 
             with open(targetLabels, 'a') as gtFile:
                 imgName, label = getFileNameAndLabel(aLine)
@@ -192,6 +194,7 @@ def forwardAUViewFold(au, view, fold, targetSet, trainFilesDir, baseTargetForwar
     transformerFLOW, transformerRGB = createTransformers(net)
 
     netParams = [net, transformerRGB, transformerFLOW]
+    
     
 
     gts, preds, scores = forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, layerData,
