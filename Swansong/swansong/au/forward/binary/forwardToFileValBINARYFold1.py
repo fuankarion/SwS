@@ -13,7 +13,7 @@ for anAU in aus:
         auName = anAU
         view =aView
         fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Test.txt'
-        modelsRootPath = '/home/jcleon/Storage/disk2/foldFera17/fold_1/'
+        modelsRootPath = '/home/jcleon/Storage/disk2/fold/fold_1/'
         layerData = 'softmax'
 
         basePathFlow = '/home/jcleon/Storage/ssd0/Flow/Val'
