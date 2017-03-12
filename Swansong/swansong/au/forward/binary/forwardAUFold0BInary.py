@@ -7,8 +7,8 @@ from forwardCore import *
 #aus = ['AU01', 'AU04']
 #views = ['v1', 'v2']
 
-aus = ['AU01']
-views = ['v1']
+aus = ['AU01','AU04','AU06']
+views = ['v1','v2','v6']
 fold=0
 
 trainFilesDir = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/'
