@@ -18,6 +18,7 @@ auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06
 
 def loadNetModel(auName, view, modelsRootPath):
     tagetModels = modelsRootPath + '/' + view + '/' + auName + '/*.caffemodel'
+    print('tagetModels ', tagetModels)
     modelCand = glob.glob(tagetModels)
     print('Load model ', modelCand[0])
     net = caffe.Net('/home/jcleon/Storage/disk2/ModeslAFConcat2/deploy_Test.prototxt',
