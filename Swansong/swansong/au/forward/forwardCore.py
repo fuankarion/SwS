@@ -14,7 +14,7 @@ caffe.set_device(1)
 caffe.set_mode_gpu()
 
 #Globals
-auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
+auArray = ['AU01','AU04' 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
 
 def loadNetModel(auName, view, modelsRootPath):
     tagetModels = modelsRootPath + '/' + view + '/' + auName + '/*.caffemodel'
@@ -191,9 +191,14 @@ def forwardAUViewFold(au, view, fold, targetSet, trainFilesDir, baseTargetForwar
     print('modelsRootPath ', modelsRootPath)
     print('targetForward ', targetForward)
     
-    net = loadNetModel(au, view, modelsRootPath)
+    net=None
+    try:
+         net = loadNetModel(au, view, modelsRootPath)
+    except:
+        print('No model Yet')
+        return
+   
     transformerFLOW, transformerRGB = createTransformers(net)
-
     netParams = [net, transformerRGB, transformerFLOW]
     
     
