@@ -121,6 +121,9 @@ def loadLabels(rootPath, aSubject, aTask, view, K, bulkLoadDir, extra, au):
 def reshapeTrainData(feats, labels, K):
     print('Reshape')
     x = range(0, feats.shape[0])
+    
+    #print('x',x)
+    #print('K',K)
 
     reshaped = np.zeros([len(x)-(K-1), K, feats.shape[1]])
     labelsReshaped = np.zeros(0, dtype=int)

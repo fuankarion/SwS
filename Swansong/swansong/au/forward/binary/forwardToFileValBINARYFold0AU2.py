@@ -5,7 +5,7 @@ from forwardCoreNoJitter import *
 
 #exec
 aus = ['AU01']
-views = ['v4', 'v3', 'v1', 'v2', 'v5', 'v6', 'v7', 'v8', 'v9']
+views = ['v2']
 fold = 0
 layerData = 'softmax'
 basePathFlow = '/home/jcleon/Storage/ssd0/Flow/Val'

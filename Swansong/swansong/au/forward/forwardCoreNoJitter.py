@@ -13,7 +13,7 @@ import matlab
 caffe.set_device(0)
 caffe.set_mode_gpu()
 
-auArray = ['AU01', 'AU04', 'AU06', 'AU07', 'AU10', 'AU12', 'AU14', 'AU15', 'AU017', 'AU023']
+auArray = ['AU01', 'AU04', 'AU06', 'AU07', 'AU10', 'AU12', 'AU14', 'AU15', 'AU17', 'AU23']
 
 def loadNetModel(auName, view, modelsRootPath):
     tagetModels = modelsRootPath + view + '/' + auName + '/*.caffemodel'

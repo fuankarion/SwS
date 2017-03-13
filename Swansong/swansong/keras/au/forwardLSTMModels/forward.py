@@ -6,13 +6,13 @@ from trainCore import *
 import matlab.engine
 import matlab
 
-aK = 40
+aK = 2
 au = 'AU01'
 view = 'v1'
 jointModel = load_model('/home/jcleon/Storage/ssd0/ModelsLSTM/'+ '/' + au + '-' + view + '-K' + str(aK) + '.h5')
+txtFeatsTestDir = '/home/jcleon/Storage/disk2/featsDebug/Val/'+au+'_'+view+'_Fold1' #always fold1
 
 
-txtFeatsTestDir = '/home/jcleon/Storage/disk2/foldFeats/Val/'+au+'_'+view+'_Fold1' #always fold1
 print('txtFeatsTestDir',txtFeatsTestDir)
 
 bulkLoadDirVal = '/home/jcleon/Storage/ssd0/BL/Val/'
