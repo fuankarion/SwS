@@ -3,8 +3,9 @@ sys.path.append('../')
 
 from forwardCore import *
 
-aus = ['AU04', 'AU06']
-views = ['v6']
+#aus = ['AU01', 'AU04', 'AU06', 'AU07', 'AU10', 'AU12', 'AU14', 'AU15', 'AU017', 'AU023']
+aus = ['AU01', 'AU04', 'AU06', 'AU07', 'AU10']
+views = ['v3']
 fold = 0
 
 trainFilesDir = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/'

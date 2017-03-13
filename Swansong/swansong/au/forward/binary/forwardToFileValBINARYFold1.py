@@ -3,26 +3,30 @@ sys.path.append('../')
 
 from forwardCoreNoJitter import *
 
-aus = ['AU04']
-views = ['v2']
-fold=0
+#exec
+aus = ['AU01', 'AU10']
+views = ['v6']
+fold = 1
+layerData = 'softmax'
+basePathFlow = '/home/jcleon/Storage/ssd0/Flow/Val'
+targetForward = '/home/jcleon/Storage/ssd0/featsDebug/Val/'
 
 for anAU in aus:
-    for aView in views:
-        #exec
-        auName = anAU
-        view =aView
-        fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Test.txt'
-        modelsRootPath = '/home/jcleon/Storage/disk2/fold/fold_1/'
-        layerData = 'softmax'
+    for aView in views: 
+        fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + aView + '/Test.txt'
+        modelsRootPath = '/home/jcleon/Storage/disk2/fold/fold_' + str(fold)+'/'
+        targetForward = targetForward + '/' + anAU + '_' + aView + '_Fold' + str(fold)
 
-        basePathFlow = '/home/jcleon/Storage/ssd0/Flow/Val'
-        targetForward = '/home/jcleon/Storage/disk2/foldFeats/Val/' + '/' + auName + '_' + view + '_Fold1'
-
-        net = loadNetModel(auName, view, modelsRootPath)
+        net = None
+        try:
+            net = loadNetModel(anAU, aView, modelsRootPath)
+        except:
+            print('No model Yet')
+            continue
+    
         transformerFLOW, transformerRGB = createTransformers(net)
 
-        gts, preds, scores = forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFlow, layerData, auName)
+        gts, preds, scores = forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFlow, layerData, anAU)
 
         eng = matlab.engine.start_matlab()
         cs = classification_report(gts, preds)

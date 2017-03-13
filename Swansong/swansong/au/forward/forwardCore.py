@@ -14,7 +14,6 @@ caffe.set_device(1)
 caffe.set_mode_gpu()
 
 #Globals
-auArray = ['AU01', 'AU04' 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
 
 def loadNetModel(auName, view, modelsRootPath):
     tagetModels = modelsRootPath + '/' + view + '/' + auName + '/*.caffemodel'
@@ -173,9 +172,18 @@ def forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, laye
             with open(finalTargetForward, 'wb') as myFile:
                 np.savetxt(myFile, feat, delimiter=",")
 
-            if idx % 100 == 0 and idx > 0:
+            if idx % 200 == 0 and idx > 0:
                 print(classification_report(gts, preds))
             idx = idx + 1
+            
+            if idx % 1000 == 0 and idx > 1:
+                print('fileGT', fileGT)
+                print('au', au)
+                eng = matlab.engine.start_matlab()
+                cs = classification_report(gts, preds)
+                ps = eng.CalcRankPerformance(matlab.int8(gts), matlab.double(scores), 1, 'All')
+                F1_MAX = max(np.array(ps['F1']))[0]
+                print('F1_MAX ', F1_MAX)
           
     return gts, preds, scores
 
@@ -202,8 +210,6 @@ def forwardAUViewFold(au, view, fold, targetSet, trainFilesDir, baseTargetForwar
    
     transformerFLOW, transformerRGB = createTransformers(net)
     netParams = [net, transformerRGB, transformerFLOW]
-    
-    
 
     gts, preds, scores = forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, layerData,
                                            au, baseRGBImagesPath, baseJitterImagesPath)

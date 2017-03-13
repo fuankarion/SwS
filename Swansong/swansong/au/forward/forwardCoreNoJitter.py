@@ -13,7 +13,7 @@ import matlab
 caffe.set_device(0)
 caffe.set_mode_gpu()
 
-auArray = ['AU01', 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
+auArray = ['AU01', 'AU04', 'AU06', 'AU07', 'AU10', 'AU12', 'AU14', 'AU15', 'AU017', 'AU023']
 
 def loadNetModel(auName, view, modelsRootPath):
     tagetModels = modelsRootPath + view + '/' + auName + '/*.caffemodel'
@@ -64,7 +64,7 @@ def netForward(net, transformerFLOW, transformerRGB, imgRGB, imgFLow):
     return net, True
 
 
-def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFLow, layer,au):
+def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFLow, layer, au):
     gts = []
     preds = []
     scores = []
@@ -104,7 +104,8 @@ def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForwar
                              
                          
             auIdx = auArray.index(au)
-            gts.append(int(lineTokens[auIdx+1]))
+            gts.append(int(lineTokens[auIdx + 1]))
+            #print('GT ', int(lineTokens[auIdx + 1]))
             preds.append(net.blobs['softmax'].data[0].argmax())
             scores.append(net.blobs['softmax'].data[0][1])
 
@@ -121,6 +122,15 @@ def forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForwar
                 print('Forwards ', idx)
                 print(classification_report(gts, preds))
                
+            if idx % 1000 == 0 and idx > 1:
+                print('fileGT', fileGT)
+                print('au', au)
+                eng = matlab.engine.start_matlab()
+                cs = classification_report(gts, preds)
+                ps = eng.CalcRankPerformance(matlab.int8(gts), matlab.double(scores), 1, 'All')
+                F1_MAX = max(np.array(ps['F1']))[0]
+                print('F1_MAX ', F1_MAX)
+            
             idx = idx + 1
          
     return gts, preds, scores

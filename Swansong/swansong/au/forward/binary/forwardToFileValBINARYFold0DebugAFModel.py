@@ -4,7 +4,7 @@ sys.path.append('../')
 from forwardCoreNoJitter import *
 
 #exec
-aus = ['AU04']
+aus = ['AU06']
 views = ['v6']
 fold = 0
 layerData = 'softmax'
@@ -14,7 +14,7 @@ targetForward = '/home/jcleon/Storage/ssd0/featsDebug/Val/'
 for anAU in aus:
     for aView in views: 
         fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + aView + '/Test.txt'
-        modelsRootPath = '/home/jcleon/Storage/disk2/fold/fold_' + str(fold)+'/'
+        modelsRootPath = '/home/jcleon/Storage/disk2/ModelsAF/snapshot_concat2_old/'
         targetForward = targetForward + '/' + anAU + '_' + aView + '_Fold' + str(fold)
 
         net = None

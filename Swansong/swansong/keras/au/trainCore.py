@@ -51,7 +51,7 @@ def getClassificationScoreMaxCriteria(feats, labels):
    
     cr = classification_report(gtMax, predsMax)
     print(cr)
-    return predsMax
+    return predsMax,cr
 
 def writeBulkLoadFeats(bulkLoadDir, aSubject, aTask, view, K, data, extra):
     bulkLoadFile = bulkLoadDir + '/' + aSubject + '-' + aTask + '-' + view + '-' + extra  + str(K)
@@ -235,7 +235,7 @@ def trainLSTMModel(au, view, trainFold, jointModel, steps,baseFeatsDir):
     print('Unablanced samples')
     negProportion, posProportion = getCounts(trainLabelsUnbalanced)
 
-    jointModel.fit([trainFeatsUnbalanced, trainFeatsUnbalanced], trainLabelsUnbalanced, nb_epoch=150, batch_size=6000, verbose=1)
+    jointModel.fit([trainFeatsUnbalanced, trainFeatsUnbalanced], trainLabelsUnbalanced, nb_epoch=150, batch_size=12000, verbose=1)
     return jointModel, trainLabelsUnbalanced, trainFeatsUnbalanced
 
 def evalModel(au, view, evalFold, trainedModel, trainLabelsUnbalanced, trainFeatsUnbalanced, steps,baseFeatsDir):
@@ -255,25 +255,38 @@ def evalModel(au, view, evalFold, trainedModel, trainLabelsUnbalanced, trainFeat
     txtFeatsTestDir = baseFeatsDir + '/' + au + '_' + view + '_Fold' + str(evalFold)
     testFeats, testLabels = loadSet(testSubjects, tasksVal, txtFeatsTestDir, view, steps, bulkLoadDirVal, au)
 
+    result=''
     print('Counts Train Full')
     negProportion, posProportion = getCounts(trainLabelsUnbalanced)
-    print('Classification MAX Score Train Full')
-    getClassificationScoreMaxCriteria(trainFeatsUnbalanced, trainLabelsUnbalanced)
+    #print('Classification MAX Score Train Full')
+    dontCare,cr=getClassificationScoreMaxCriteria(trainFeatsUnbalanced, trainLabelsUnbalanced)
+    result=result+'Classification MAX Score Train Full'+'\n'
+    result=result+cr+'\n'
 
     print('LSTM Classficiation Train Set')
     preds = trainedModel.predict_classes([trainFeatsUnbalanced, trainFeatsUnbalanced])
-    print(' ')
-    print(classification_report(trainLabelsUnbalanced, preds))
+    #print(' ')
+    #print(classification_report(trainLabelsUnbalanced, preds))
+    result=result+'LSTM Classficiation Train Se'+'\n'
+    result=result+classification_report(trainLabelsUnbalanced, preds)+'\n'
 
     print('LSTM Classficiation Val Set')
     preds = trainedModel.predict_classes([testFeats, testFeats])
-    print(' ')
-    print(classification_report(testLabels, preds))
+    #print(' ')
+    #print(classification_report(testLabels, preds))
+    result=result+'LSTM Classficiation Val Set'+'\n'
+    result=result+classification_report(testLabels, preds)+'\n'
 
     print('Counts Val UNBalanced')
     getCounts(testLabels)
-    print('Classification MAX Score Val UNBalanced')
+    #print('Classification MAX Score Val UNBalanced')
     getClassificationScoreMaxCriteria(testFeats, testLabels)
+    
+    dontCare,cr=getClassificationScoreMaxCriteria(testFeats, testLabels)
+    result=result+'Classification MAX Score Val UNBalanced'+'\n'
+    result=result+cr+'\n'
+    
+    return result
 
 def createModel(timeSteps):
     ###Kerasmodel
