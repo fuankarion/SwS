@@ -3,8 +3,8 @@ sys.path.append('../')
 
 from forwardCoreNoJitter import *
 
-aus = ['AU01','AU04','AU06']
-views = ['v1','v2','v6']
+aus = ['AU04']
+views = ['v2']
 fold=0
 
 for anAU in aus:

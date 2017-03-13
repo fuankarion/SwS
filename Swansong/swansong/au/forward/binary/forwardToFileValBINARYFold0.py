@@ -1,28 +1,32 @@
 import sys
 sys.path.append('../')
 
-from forwardCore import *
+from forwardCoreNoJitter import *
 
 #exec
-auName = 'AU04'
-view = 'v2'
-fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + view + '/Test.txt'
-modelsRootPath = '/home/jcleon/Storage/disk2/foldFera17/fold_0/'
+aus = ['AU04', 'AU06']
+views = ['v6']
+fold = 0
 layerData = 'softmax'
-
 basePathFlow = '/home/jcleon/Storage/ssd0/Flow/Val'
-targetForward = '/home/jcleon/Storage/ssd0/FeatsVal/SoftMaxActivations/' + '/' + auName + '_' + view + '_Fold0'
+targetForward = '/home/jcleon/Storage/ssd0/featsDebug/Val/'
 
-net = loadNetModel(auName, view, modelsRootPath)
-transformerFLOW, transformerRGB = createTransformers(net)
+for anAU in aus:
+    for aView in views: 
+        fileGT = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/' + aView + '/Test.txt'
+        modelsRootPath = '/home/jcleon/Storage/disk2/fold/fold_' + str(fold)+'/'
+        targetForward = targetForward + '/' + anAU + '_' + aView + '_Fold' + str(fold)
 
-gts, preds, scores = forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFlow,layerData,auName)
+        net = loadNetModel(anAU, aView, modelsRootPath)
+        transformerFLOW, transformerRGB = createTransformers(net)
 
-eng = matlab.engine.start_matlab()
-cs = classification_report(gts, preds)
-ps = eng.CalcRankPerformance(matlab.int8(gts), matlab.double(scores), 1, 'All')
-F1_MAX = max(np.array(ps['F1']))[0]
+        gts, preds, scores = forwardFormGTFile(net, transformerFLOW, transformerRGB, fileGT, targetForward, basePathFlow, layerData, anAU)
 
-with open(targetForward + '/overalReport.txt', 'a') as reportFile:
-    reportFile.write(str(cs) + ' \n ' + ' F1Max: ' + str(F1_MAX))
+        eng = matlab.engine.start_matlab()
+        cs = classification_report(gts, preds)
+        ps = eng.CalcRankPerformance(matlab.int8(gts), matlab.double(scores), 1, 'All')
+        F1_MAX = max(np.array(ps['F1']))[0]
+
+        with open(targetForward + '/overalReport.txt', 'a') as reportFile:
+            reportFile.write(str(cs) + ' \n ' + ' F1Max: ' + str(F1_MAX))
 

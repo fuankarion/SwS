@@ -7,14 +7,14 @@ from forwardCore import *
 #aus = ['AU01', 'AU04']
 #views = ['v1', 'v2']
 
-aus = ['AU01','AU04','AU06']
-views = ['v1','v2','v6']
-fold=1
+aus = ['AU04', 'AU06']
+views = ['v6']
+fold = 1
 
 trainFilesDir = '/home/jcleon/Storage/ssd0/fullFaceTrainFiles/'
 foldModelsPath = '/home/jcleon/Storage/disk2/fold'
 layerData = 'softmax'
-baseTargetForward = '/home/jcleon/Storage/disk2/foldFeats'
+baseTargetForward = '/home/jcleon/Storage/ssd0/featsDebug'
 
 baseRGBImagesPath = '/home/jcleon/Storage/ssd0/RGB/'
 baseFlowImagesPath = '/home/jcleon/Storage/disk2/resizedFera17-256Flow/'
