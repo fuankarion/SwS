@@ -14,7 +14,7 @@ caffe.set_device(1)
 caffe.set_mode_gpu()
 
 #Globals
-auArray = ['AU01','AU04' 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
+auArray = ['AU01', 'AU04' 'AU10', 'AU12', 'AU04', 'AU15', 'AU17', 'AU23', 'AU14', 'AU06', 'AU07']
 
 def loadNetModel(auName, view, modelsRootPath):
     tagetModels = modelsRootPath + '/' + view + '/' + auName + '/*.caffemodel'
@@ -95,6 +95,7 @@ def getConvertedPathsFromGTLine(aLine, baseFlowImagesPath, baseRGBImagesPath, ba
     print(' ')
     """
     
+    
     return convertedRGBPath, convertedFlowPath 
 
 
@@ -102,7 +103,6 @@ def getTargetForward(aLine, targetForward):
     lineTokens = aLine.split(' ')
     pathTokens = lineTokens[0].split('/')
     
-    print
     jitterToken = pathTokens[9]
     #print('targetForward ', targetForward)
     dirTargetForward = targetForward + '/' + pathTokens[-4] + '/' + pathTokens[-3] + '/' + pathTokens[-2]
@@ -138,6 +138,7 @@ def forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, laye
 
         idx = 0
         for aLine in content:
+            #print('aLine ',aLine)
             convertedRGBPath, convertedFlowPath = getConvertedPathsFromGTLine(aLine, baseFlowImagesPath, baseRGBImagesPath, baseJitterImagesPath)
             net, flag = netForward(net, transformerFLOW, transformerRGB, convertedRGBPath, convertedFlowPath)
 
@@ -151,11 +152,11 @@ def forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, laye
             """
             print('convertedRGBPath ', convertedRGBPath)
             print('convertedFlowPath ', convertedFlowPath)
+            
             print('dirTargetForward ', dirTargetForward)
             print('finalTargetForward ', finalTargetForward)
             print('OK ')
             """
-
             with open(targetLabels, 'a') as gtFile:
                 imgName, label = getFileNameAndLabel(aLine)
                 tokensFTF = finalTargetForward.split('/')
@@ -172,28 +173,29 @@ def forwardFormGTFile(netParams, fileGT, targetForward, baseFlowImagesPath, laye
             with open(finalTargetForward, 'wb') as myFile:
                 np.savetxt(myFile, feat, delimiter=",")
 
-            if idx % 200 == 0 and idx > 0:
+            if idx % 100 == 0 and idx > 0:
                 print(classification_report(gts, preds))
-               
             idx = idx + 1
-         
+          
     return gts, preds, scores
 
 def forwardAUViewFold(au, view, fold, targetSet, trainFilesDir, baseTargetForward,
                       layerData, foldModelsPath, baseFlowImagesPath, baseRGBImagesPath, baseJitterImagesPath):
+    
     auOhne0 = au.replace('0', '')
     
     fileGT = trainFilesDir + view + '/Training_' + auOhne0 + '.txt'
     modelsRootPath = foldModelsPath + '/fold_' + str(fold)
     targetForward = baseTargetForward + '/' + targetSet + '/' + au + '_' + view + '_Fold' + str(fold)
     
+    
     print('fileGT ', fileGT)
     print('modelsRootPath ', modelsRootPath)
     print('targetForward ', targetForward)
     
-    net=None
+    net = None
     try:
-         net = loadNetModel(au, view, modelsRootPath)
+        net = loadNetModel(au, view, modelsRootPath)
     except:
         print('No model Yet')
         return
